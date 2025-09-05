@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
@@ -46,8 +48,16 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/transactions")
-    public ResponseEntity<Page<TransactionDTO>> getTransactionHistory(@PathVariable Long accountId, Pageable pageable) {
+    public ResponseEntity<List<TransactionDTO>> getTransactionHistory(
+            @PathVariable Long accountId,
+            Pageable pageable) {
         Page<Transaction> transactions = accountService.getTransactionHistory(accountId, pageable);
-        return ResponseEntity.ok(transactions.map(t -> modelMapper.map(t, TransactionDTO.class)));
+
+        List<TransactionDTO> transactionList = transactions
+                .map(t -> modelMapper.map(t, TransactionDTO.class))
+                .getContent();  // ✅ Only take the content
+
+        return ResponseEntity.ok(transactionList);
     }
+
 }
